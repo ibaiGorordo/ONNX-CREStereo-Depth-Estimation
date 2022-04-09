@@ -1,4 +1,3 @@
 opencv-python
 imread-from-url
 onnxruntime-gpu
-performance_monitor
