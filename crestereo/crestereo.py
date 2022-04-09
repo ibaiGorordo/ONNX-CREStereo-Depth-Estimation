@@ -1,4 +1,3 @@
-import sys
 from dataclasses import dataclass
 
 import cv2
@@ -16,52 +15,49 @@ DEFAULT_CONFIG = CameraConfig(0.546, 120) # rough estimate from the original cal
 
 class CREStereo():
 
-	def __init__(self, model_path, model_half_path=None, camera_config=DEFAULT_CONFIG, max_dist=10):
+	def __init__(self, model_path, camera_config=DEFAULT_CONFIG, max_dist=10):
 
-		self.initialize_model(model_path, model_half_path, camera_config, max_dist)
+		self.initialize_model(model_path, camera_config, max_dist)
 
 	def __call__(self, left_img, right_img):
 
 		return self.update(left_img, right_img)
 
-	def initialize_model(self, model_path, model_half_path=None, camera_config=DEFAULT_CONFIG, max_dist=10):
+	def initialize_model(self, model_path, camera_config=DEFAULT_CONFIG, max_dist=10):
 
 		self.camera_config = camera_config
 		self.max_dist = max_dist
-		self.session_half = None
 
 		# Initialize model session
 		self.session = onnxruntime.InferenceSession(model_path, providers=['CUDAExecutionProvider',
 																		   'CPUExecutionProvider'])
-		
 		# Get model info
 		self.get_input_details()
 		self.get_output_details()
 
-		# Add the half resolution model if passed
-		if model_half_path:
-			self.session_half = onnxruntime.InferenceSession(model_half_path, providers=['CUDAExecutionProvider',
-																			   			 'CPUExecutionProvider'])
-		elif len(self.input_names) > 2:
-			print("You need to pass either a model without flow_init input, or an additional model to estimate flow_init")
-			sys.exit(0)
+		# Check if the model has init flow
+		self.has_flow = len(self.input_names) > 2
 
 	def update(self, left_img, right_img):
 
-		flow_init = None
-
-		if self.session_half:
-
-			left_tensor_half = self.prepare_input(left_img, half=True)
-			right_tensor_half = self.prepare_input(right_img, half=True)
-
-			flow_init = self.inference(left_tensor_half, right_tensor_half)
+		self.img_height, self.img_width = left_img.shape[:2]
 
 		left_tensor = self.prepare_input(left_img)
 		right_tensor = self.prepare_input(right_img)
 
-		# Estimate the disparity map
-		outputs = self.inference(left_tensor, right_tensor, flow_init)
+		# Get the half resolution to calculate flow_init 
+		if self.has_flow:
+
+			left_tensor_half = self.prepare_input(left_img, half=True)
+			right_tensor_half = self.prepare_input(right_img, half=True)
+
+			# Estimate the disparity map
+			outputs = self.inference_with_flow(left_tensor_half, right_tensor_half,
+												left_tensor, right_tensor)
+		else:
+			# Estimate the disparity map
+			outputs = self.inference_without_flow(left_tensor, right_tensor)
+
 		self.disparity_map = self.process_output(outputs)
 
 		# Estimate depth map from the disparity
@@ -72,8 +68,6 @@ class CREStereo():
 	def prepare_input(self, img, half=False):
 
 		img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
-		self.img_height, self.img_width = img.shape[:2]
 
 		if half:
 			img_input = cv2.resize(img, (self.input_width//2,self.input_height//2))
@@ -86,21 +80,18 @@ class CREStereo():
 		return img_input.astype(np.float32)
 
 	@performance
-	def inference(self, left_tensor, right_tensor, flow_init=None):
+	def inference_without_flow(self, left_tensor, right_tensor):
 
-		if self.session_half and flow_init is None:
+		return self.session.run(self.output_names, {self.input_names[0]: left_tensor,
+										            self.input_names[1]: right_tensor})[0]
 
-			return self.session_half.run(self.output_names, {self.input_names[0]: left_tensor,
-													         self.input_names[1]: right_tensor})[0]
-		elif flow_init is None:
+	@performance
+	def inference_with_flow(self, left_tensor_half, right_tensor_half, left_tensor, right_tensor):
 
-			return self.session.run(self.output_names, {self.input_names[0]: left_tensor,
-										                self.input_names[1]: right_tensor})[0]
-
-		else:
-			return self.session.run(self.output_names, {self.input_names[0]: left_tensor,
-										                self.input_names[1]: right_tensor,
-										                self.input_names[2]: flow_init})[0]
+		return self.session.run(self.output_names, {self.input_names[0]: left_tensor_half,
+										            self.input_names[1]: right_tensor_half,
+													self.input_names[2]: left_tensor,
+										            self.input_names[3]: right_tensor})[0]
 
 	def process_output(self, output): 
 
@@ -139,7 +130,7 @@ class CREStereo():
 		model_inputs = self.session.get_inputs()
 		self.input_names = [model_inputs[i].name for i in range(len(model_inputs))]
 
-		self.input_shape = model_inputs[0].shape
+		self.input_shape = model_inputs[-1].shape
 		self.input_height = self.input_shape[2]
 		self.input_width = self.input_shape[3]
 
@@ -155,16 +146,16 @@ if __name__ == '__main__':
 	from imread_from_url import imread_from_url
 
 	# Initialize model
-	model_path = '../models/crestereo_sim.onnx'
-	model_half_path = '../models/crestereo_without_flow_sim.onnx'
-	depth_estimator = CREStereo(model_path, model_half_path)
+	model_path = '../models/crestereo_combined_iter10_360x640.onnx'
+	depth_estimator = CREStereo(model_path)
 
 	# Load images
 	left_img = imread_from_url("https://vision.middlebury.edu/stereo/data/scenes2003/newdata/cones/im2.png")
 	right_img = imread_from_url("https://vision.middlebury.edu/stereo/data/scenes2003/newdata/cones/im6.png")
 
 	# Estimate depth and colorize it
-	disparity_map = depth_estimator(left_img, right_img)
+	for i in range(10):
+		disparity_map = depth_estimator(left_img, right_img)
 	color_disparity = depth_estimator.draw_disparity()
 
 	combined_img = np.hstack((left_img, color_disparity))

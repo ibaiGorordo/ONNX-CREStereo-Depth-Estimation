@@ -16,21 +16,29 @@ def get_driving_stereo_images(base_path, start_sample=0):
 
 	return left_images[start_sample:], right_images[start_sample:], depth_images[start_sample:]
 
-# Store baseline (m) and focal length (pixel)
-input_width = 640
-camera_config = CameraConfig(0.546, 500*input_width/1720) # rough estimate from the original calibration
-max_distance = 20
+# Model options (not all options supported together)
+iters = 5            # Lower iterations are faster, but will lower detail. 
+		             # Options: 2, 5, 10, 20 
 
-# Initialize model (Skip depth refinement for speed)
-model_path = 'models/crestereo_sim.onnx'
-model_half_path = 'models/crestereo_without_flow_sim.onnx'
-depth_estimator = CREStereo(model_path, model_half_path, camera_config=camera_config, max_dist=max_distance)
+input_shape = (320, 480)   # Input resolution. 
+				     # Options: (240,320), (320,480), (380, 480), (360, 640), (480,640), (720, 1280)
+
+version = "combined" # The combined version does 2 passes, one to get an initial estimation and a second one to refine it.
+					 # Options: "init", "combined"
+
+# Initialize model
+model_path = f'models/crestereo_{version}_iter{iters}_{input_shape[0]}x{input_shape[1]}.onnx'
+depth_estimator = CREStereo(model_path, camera_config=camera_config, max_dist=max_distance)
+
+# Camera options: baseline (m), focal length (pixel) and max distance
+camera_config = CameraConfig(0.546, 500*input_shape[1]/1720) # rough estimate from the original calibration
+max_distance = 20
 
 # Get the driving stereo samples
 driving_stereo_path = "drivingStereo"
 start_sample = 700
 left_images, right_images, depth_images = get_driving_stereo_images(driving_stereo_path, start_sample)
-# out = cv2.VideoWriter('outpy2.avi',cv2.VideoWriter_fourcc('M','J','P','G'), 20, (881,400*2))
+# out = cv2.VideoWriter('output.avi',cv2.VideoWriter_fourcc('M','J','P','G'), 20, (881,400*2))
 
 cv2.namedWindow("Estimated depth", cv2.WINDOW_NORMAL)	
 for left_path, right_path, depth_path in zip(left_images, right_images, depth_images):
