@@ -70,6 +70,10 @@ The original MegEngine model was converted to Pytorch with this repository: http
  ```
  python depthai_host_depth_estimation.py
  ```
+# Model option comparison
+In the graph below, the different model options, i.e. input shape, version (init or combined) and number of iterations are combined. The comparison is done compared to the results obtained with the largest model (720x1280 combined with 20 iters), as it is expected to provide the best results. 
+- The size of the marker indicates the number of iterations, increasing with the number of iterations.
+![!CREStereo model option comparison](https://github.com/ibaiGorordo/ONNX-CREStereo-Depth-Estimation/blob/main/doc/img/crestereo_options_comp.png)
 
 # References:
 * CREStereo model: https://github.com/megvii-research/CREStereo
