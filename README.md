@@ -36,7 +36,7 @@ pip install git+https://github.com/zizo-pro/pafy@b8976f22c19e4ab5515cacbfae0a397
 You might need additional installations, check the depthai reference below for more details.
 
 # ONNX model
-The models were converted from the Pytorch implementation below. Download the models from [here](https://drive.google.com/file/d/1GxIcfHrMmIfsl2dPugp8el_ZWFivFttT/view?usp=sharing) and [here](https://drive.google.com/file/d/18z9d12NGTpv25YgVLIqxRakWITUGtSC2/view?usp=sharing); and save them into the **[models](https://github.com/ibaiGorordo/ONNX-CREStereo-Depth-Estimation/tree/main/models)** folder. 
+The models were converted from the Pytorch implementation below by [PINTO0309](https://github.com/PINTO0309), download the models from the download script in [his repository](https://github.com/PINTO0309/PINTO_model_zoo/tree/main/284_CREStereo) and save them into the **[models](https://github.com/ibaiGorordo/ONNX-CREStereo-Depth-Estimation/tree/main/models)** folder. 
 - The License of the models is Apache-2.0 License: https://github.com/megvii-research/CREStereo/blob/master/LICENSE
 
 # Original MegEngine model
