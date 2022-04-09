@@ -26,13 +26,13 @@ input_shape = (320, 480)   # Input resolution.
 version = "combined" # The combined version does 2 passes, one to get an initial estimation and a second one to refine it.
 					 # Options: "init", "combined"
 
-# Initialize model
-model_path = f'models/crestereo_{version}_iter{iters}_{input_shape[0]}x{input_shape[1]}.onnx'
-depth_estimator = CREStereo(model_path, camera_config=camera_config, max_dist=max_distance)
-
 # Camera options: baseline (m), focal length (pixel) and max distance
 camera_config = CameraConfig(0.546, 500*input_shape[1]/1720) # rough estimate from the original calibration
 max_distance = 20
+
+# Initialize model
+model_path = f'models/crestereo_{version}_iter{iters}_{input_shape[0]}x{input_shape[1]}.onnx'
+depth_estimator = CREStereo(model_path, camera_config=camera_config, max_dist=max_distance)
 
 # Get the driving stereo samples
 driving_stereo_path = "drivingStereo"

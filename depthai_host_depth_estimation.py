@@ -38,20 +38,20 @@ def create_pipeline():
     return pipeline
 
 # Model options (not all options supported together)
-iters = 5            # Lower iterations are faster, but will lower detail. 
+iters = 2            # Lower iterations are faster, but will lower detail. 
                      # Options: 2, 5, 10, 20 
 
-input_shape = (320, 480)   # Input resolution. 
-                     # Options: (240,320), (320,480), (380, 480), (360, 640), (480,640), (720, 1280)
+input_shape = (180, 320)   # Input resolution. 
+                           # Options: (240,320), (320,480), (380, 480), (360, 640), (480,640), (720, 1280)
 
-version = "combined" # The combined version does 2 passes, one to get an initial estimation and a second one to refine it.
+version = "init" # The combined version does 2 passes, one to get an initial estimation and a second one to refine it.
                      # Options: "init", "combined"
 
 # Camera options: baseline (m), focal length (pixel) and max distance for OAK-D Lite
 # Ref: https://docs.luxonis.com/en/latest/pages/faq/#how-do-i-calculate-depth-from-disparity
 # TODO: Modify values corrsponding with YOUR BOARD info
 camera_config = CameraConfig(0.075, 0.5*input_shape[1]/0.72) # 71.9 deg. FOV 
-max_distance = 5
+max_distance = 3
 
 # Initialize model
 model_path = f'models/crestereo_{version}_iter{iters}_{input_shape[0]}x{input_shape[1]}.onnx'

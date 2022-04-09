@@ -8,7 +8,7 @@ from crestereo import CREStereo
 iters = 5            # Lower iterations are faster, but will lower detail. 
 		             # Options: 2, 5, 10, 20 
 
-shape = (320, 480)   # Input resolution. 
+shape = (240, 320)   # Input resolution. 
 				     # Options: (240,320), (320,480), (380, 480), (360, 640), (480,640), (720, 1280)
 
 version = "combined" # The combined version does 2 passes, one to get an initial estimation and a second one to refine it.
