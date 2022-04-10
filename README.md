@@ -57,13 +57,22 @@ The original MegEngine model was converted to Pytorch with this repository: http
  python video_depth_estimation.py
  ```
  
- * **Driving Stereo dataet inference**: https://youtu.be/ciX7ILgpJtw
+ * **Driving Stereo dataset inference**: https://youtu.be/ciX7ILgpJtw
  ```
  python driving_stereo_test.py
  ```
  ![!CREStereo depth estimation](https://github.com/ibaiGorordo/ONNX-CREStereo-Depth-Estimation/blob/main/doc/img/crestereo.gif)
   
  *Original video: Driving stereo dataset, reference below*
+
+ * **Driving Stereo 3D point cloud visualization**: https://youtu.be/vlBbH28PgHk
+ ```
+ python driving_stereo_point_cloud.py
+ ```
+ ![!CREStereo depth estimation point cloud](https://github.com/ibaiGorordo/ONNX-CREStereo-Depth-Estimation/blob/main/doc/img/crestereo_point.gif)
+  
+ *Original video: Driving stereo dataset, reference below*
+  
   
 
  * **Depthai inference**: 
