@@ -48,7 +48,7 @@ depth_estimator = CREStereo(model_path, camera_config=camera_config, max_dist=ma
 driving_stereo_path = "drivingStereo"
 start_sample = 700
 left_images, right_images, depth_images = get_driving_stereo_images(driving_stereo_path, start_sample)
-out = cv2.VideoWriter('output.avi',cv2.VideoWriter_fourcc('M','J','P','G'), 20, (1920, 1061))
+# out = cv2.VideoWriter('output.avi',cv2.VideoWriter_fourcc('M','J','P','G'), 20, (1920, 1061))
 
 # Initialize the Open3d visualizer
 open3dVisualizer = Open3dVisualizer(K)
@@ -69,10 +69,10 @@ for left_path, right_path, depth_path in zip(left_images, right_images, depth_im
 	o3d_screenshot_mat = open3dVisualizer.vis.capture_screen_float_buffer()
 	o3d_screenshot_mat = (255.0 * np.asarray(o3d_screenshot_mat)).astype(np.uint8)
 	o3d_screenshot_mat = cv2.cvtColor(o3d_screenshot_mat, cv2.COLOR_RGB2BGR)
-	out.write(o3d_screenshot_mat)
+# 	out.write(o3d_screenshot_mat)
 
 	# Press key q to stop
 	if cv2.waitKey(1) == ord('q'):
 		break
 
-out.release()
+# out.release()
